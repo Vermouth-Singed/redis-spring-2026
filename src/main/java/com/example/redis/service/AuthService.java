@@ -8,6 +8,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.ObjectMapper;
 
 import java.time.Duration;
 
@@ -16,9 +17,11 @@ import java.time.Duration;
 public class AuthService {
 
     private final RedisTemplate<String, Object> redisTemplate;
+
     private static final String SESSION_PREFIX = "session:";
     private static final Duration SESSION_TTL = Duration.ofMinutes(1);
     private static final PasswordEncoder encoder = new BCryptPasswordEncoder();
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     public UserResponseDto login(String userId, String password, String sessionId) {
         UserResponseDto userResponseDto = new UserResponseDto();
@@ -52,7 +55,13 @@ public class AuthService {
     }
 
     public UserVo getSession(String sessionId) {
-        return (UserVo) redisTemplate.opsForValue().get(SESSION_PREFIX + sessionId);
+        Object userVo = redisTemplate.opsForValue().get(SESSION_PREFIX + sessionId);
+
+        if (userVo == null) {
+            return null;
+        }
+
+        return mapper.convertValue(userVo, UserVo.class);
     }
 
     public void extendSession(String sessionId) {
