@@ -8,6 +8,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
+
     private final SessionInterceptor sessionInterceptor;
 
     @Override
@@ -15,7 +16,8 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(sessionInterceptor)
             .addPathPatterns("/**")
             .excludePathPatterns(
-                "/auth/login"
+                "/auth/login",
+                "/auth/logout"
             );
     }
 }
